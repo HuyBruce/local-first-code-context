@@ -1,134 +1,122 @@
-import { Context, MilvusVectorDatabase, MilvusRestfulVectorDatabase, AstCodeSplitter, LangChainCodeSplitter } from '@zilliz/claude-context-core';
+import {
+    Context,
+    MilvusVectorDatabase,
+    MilvusRestfulVectorDatabase,
+    AstCodeSplitter,
+    LangChainCodeSplitter
+} from '@zilliz/claude-context-core';
 import { envManager } from '@zilliz/claude-context-core';
 import * as path from 'path';
 
-// Try to load .env file
 try {
     require('dotenv').config();
 } catch (error) {
-    // dotenv is not required, skip if not installed
+    // dotenv is optional for this demo.
 }
 
 async function main() {
-    console.log('🚀 Context Real Usage Example');
-    console.log('===============================');
+    console.log('Claude Context Local Demo');
+    console.log('=========================');
 
     try {
-        // 1. Choose Vector Database implementation
-        // Set to true to use RESTful API (for environments without gRPC support)
-        // Set to false to use gRPC (default, more efficient)
-        const useRestfulApi = false;
+        process.env.EMBEDDING_BATCH_SIZE = process.env.EMBEDDING_BATCH_SIZE || '10';
+        process.env.HYBRID_MODE = process.env.HYBRID_MODE || 'false';
+
+        const useRestfulApi = (process.env.MILVUS_USE_RESTFUL || '').toLowerCase() === 'true';
         const milvusAddress = envManager.get('MILVUS_ADDRESS') || 'localhost:19530';
         const milvusToken = envManager.get('MILVUS_TOKEN');
         const splitterType = envManager.get('SPLITTER_TYPE')?.toLowerCase() || 'ast';
 
-        console.log(`🔧 Using ${useRestfulApi ? 'RESTful API' : 'gRPC'} implementation`);
-        console.log(`🔌 Connecting to Milvus at: ${milvusAddress}`);
+        console.log(`Using ${useRestfulApi ? 'RESTful API' : 'gRPC'} implementation`);
+        console.log(`Connecting to Milvus at: ${milvusAddress}`);
 
-        let vectorDatabase;
-        if (useRestfulApi) {
-            // Use RESTful implementation (for environments without gRPC support)
-            vectorDatabase = new MilvusRestfulVectorDatabase({
+        const vectorDatabase = useRestfulApi
+            ? new MilvusRestfulVectorDatabase({
+                address: milvusAddress,
+                ...(milvusToken && { token: milvusToken })
+            })
+            : new MilvusVectorDatabase({
                 address: milvusAddress,
                 ...(milvusToken && { token: milvusToken })
             });
-        } else {
-            // Use gRPC implementation (default, more efficient)
-            vectorDatabase = new MilvusVectorDatabase({
-                address: milvusAddress,
-                ...(milvusToken && { token: milvusToken })
-            });
-        }
 
-        // 2. Create Context instance
-        let codeSplitter;
-        if (splitterType === 'langchain') {
-            codeSplitter = new LangChainCodeSplitter(1000, 200);
-        } else {
-            codeSplitter = new AstCodeSplitter(2500, 300);
-        }
+        const codeSplitter = splitterType === 'langchain'
+            ? new LangChainCodeSplitter(1000, 200)
+            : new AstCodeSplitter(2500, 300);
+
         const context = new Context({
             vectorDatabase,
             codeSplitter,
             supportedExtensions: ['.ts', '.js', '.py', '.java', '.cpp', '.go', '.rs']
         });
 
-        // 3. Check if index already exists and clear if needed
-        console.log('\n📖 Starting to index codebase...');
-        const codebasePath = path.join(__dirname, '../..'); // Index entire project
+        const codebasePath = process.env.DEMO_CODEBASE_PATH
+            ? path.resolve(process.env.DEMO_CODEBASE_PATH)
+            : path.join(__dirname, '../../packages/core/src');
 
-        // Check if index already exists
+        console.log(`\nStarting to index: ${codebasePath}`);
+
         const hasExistingIndex = await context.hasIndex(codebasePath);
         if (hasExistingIndex) {
-            console.log('🗑️  Existing index found, clearing it first...');
+            console.log('Existing index found, clearing it first...');
             await context.clearIndex(codebasePath);
         }
 
-        // Index with progress tracking
         const indexStats = await context.indexCodebase(codebasePath);
+        console.log(`\nIndexing stats: ${indexStats.indexedFiles} files, ${indexStats.totalChunks} code chunks`);
 
-        // 4. Show indexing statistics
-        console.log(`\n📊 Indexing stats: ${indexStats.indexedFiles} files, ${indexStats.totalChunks} code chunks`);
-
-        // 5. Perform semantic search
-        console.log('\n🔍 Performing semantic search...');
+        console.log('\nPerforming semantic search...');
 
         const queries = [
             'vector database operations',
             'code splitting functions',
             'embedding generation',
-            'typescript interface definitions'
+            'environment variable configuration'
         ];
 
         for (const query of queries) {
-            console.log(`\n🔎 Search: "${query}"`);
+            console.log(`\nSearch: "${query}"`);
             const results = await context.semanticSearch(codebasePath, query, 3, 0.3);
 
-            if (results.length > 0) {
-                results.forEach((result, index) => {
-                    console.log(`   ${index + 1}. Similarity: ${(result.score * 100).toFixed(2)}%`);
-                    console.log(`      File: ${path.join(codebasePath, result.relativePath)}`);
-                    console.log(`      Language: ${result.language}`);
-                    console.log(`      Lines: ${result.startLine}-${result.endLine}`);
-                    console.log(`      Preview: ${result.content.substring(0, 100)}...`);
-                });
-            } else {
+            if (results.length === 0) {
                 console.log('   No relevant results found');
+                continue;
             }
+
+            results.forEach((result, index) => {
+                console.log(`   ${index + 1}. Similarity: ${(result.score * 100).toFixed(2)}%`);
+                console.log(`      File: ${path.join(codebasePath, result.relativePath)}`);
+                console.log(`      Language: ${result.language}`);
+                console.log(`      Lines: ${result.startLine}-${result.endLine}`);
+                console.log(`      Preview: ${result.content.substring(0, 100)}...`);
+            });
         }
 
-        console.log('\n🎉 Example completed successfully!');
-
+        console.log('\nExample completed successfully!');
     } catch (error) {
-        console.error('❌ Error occurred:', error);
+        console.error('Error occurred:', error);
 
-        // Provide detailed error diagnostics
         if (error instanceof Error) {
             if (error.message.includes('API key')) {
-                console.log('\n💡 Please make sure to set the correct OPENAI_API_KEY environment variable');
-                console.log('   Example: export OPENAI_API_KEY="your-actual-api-key"');
+                console.log('\nCheck embedding provider configuration.');
+                console.log('   Local example: EMBEDDING_PROVIDER=Ollama and OLLAMA_MODEL=nomic-embed-text');
             } else if (error.message.includes('Milvus') || error.message.includes('connect')) {
-                console.log('\n💡 Please make sure Milvus service is running');
-                console.log('   - Default address: localhost:19530');
-                console.log('   - Can be modified via MILVUS_ADDRESS environment variable');
-                console.log('   - For RESTful API: set MILVUS_USE_RESTFUL=true');
-                console.log('   - For gRPC (default): set MILVUS_USE_RESTFUL=false or leave unset');
-                console.log('   - Start Milvus: docker run -p 19530:19530 milvusdb/milvus:latest');
+                console.log('\nCheck that Milvus is running at localhost:19530.');
             }
 
-            console.log('\n💡 Environment Variables:');
-            console.log('   - OPENAI_API_KEY: Your OpenAI API key (required)');
-            console.log('   - OPENAI_BASE_URL: Custom OpenAI API endpoint (optional)');
-            console.log('   - MILVUS_ADDRESS: Milvus server address (default: localhost:19530)');
-            console.log('   - MILVUS_TOKEN: Milvus authentication token (optional)');
-            console.log('   - SPLITTER_TYPE: Code splitter type - "ast" or "langchain" (default: ast)');
+            console.log('\nEnvironment variables:');
+            console.log('   - EMBEDDING_PROVIDER: Ollama');
+            console.log('   - OLLAMA_MODEL: nomic-embed-text');
+            console.log('   - OLLAMA_HOST: http://127.0.0.1:11434');
+            console.log('   - MILVUS_ADDRESS: localhost:19530');
+            console.log('   - DEMO_CODEBASE_PATH: Optional path to index');
+            console.log('   - EMBEDDING_BATCH_SIZE: Batch size for embeddings');
         }
 
         process.exit(1);
     }
 }
 
-// Run main program
 if (require.main === module) {
     main().catch(console.error);
 }

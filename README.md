@@ -64,6 +64,28 @@ MILVUS_ADDRESS=localhost:19530
 You still need a vector database. Use local Milvus for a no-cloud setup, or set
 `MILVUS_TOKEN`/`MILVUS_ADDRESS` for Zilliz Cloud.
 
+Run a local demo after Docker Desktop and Ollama are running:
+
+```bat
+docker run -d --name milvus-standalone --security-opt seccomp:unconfined -e ETCD_USE_EMBED=true -e ETCD_DATA_DIR=/var/lib/milvus/etcd -e COMMON_STORAGETYPE=local -v milvus_data:/var/lib/milvus -p 19530:19530 -p 9091:9091 milvusdb/milvus:v2.5.10 milvus run standalone
+
+"%LOCALAPPDATA%\Programs\Ollama\ollama.exe" pull nomic-embed-text
+
+set EMBEDDING_PROVIDER=Ollama
+set OLLAMA_MODEL=nomic-embed-text
+set EMBEDDING_MODEL=nomic-embed-text
+set OLLAMA_HOST=http://127.0.0.1:11434
+set MILVUS_ADDRESS=http://127.0.0.1:19530
+set MILVUS_USE_RESTFUL=true
+set HYBRID_MODE=false
+set EMBEDDING_BATCH_SIZE=10
+set NODE_OPTIONS=--max-old-space-size=8192
+
+node node_modules\.pnpm\tsx@4.19.4\node_modules\tsx\dist\cli.mjs examples\basic-usage\index.ts
+```
+
+The demo indexes `packages/core/src` and performs semantic searches over the generated Milvus index. It uses RESTful Milvus mode and regular dense-vector search for a stable local Windows demo path.
+
 ### Prerequisites
 
 <details>
