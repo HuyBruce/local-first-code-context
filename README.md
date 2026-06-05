@@ -79,13 +79,15 @@ set MILVUS_ADDRESS=http://127.0.0.1:19530
 set MILVUS_USE_RESTFUL=true
 set HYBRID_MODE=false
 set EMBEDDING_BATCH_SIZE=10
+set CHAT_MODEL=llama3.2:3b
+set DEMO_REINDEX=false
 set NODE_OPTIONS=--max-old-space-size=8192
 
 node node_modules\.pnpm\tsx@4.19.4\node_modules\tsx\dist\cli.mjs examples\basic-usage\index.ts
 ```
 
-The demo indexes `packages/core/src` and performs semantic searches over the generated Milvus index. It uses RESTful Milvus mode and regular dense-vector search for a stable local Windows demo path.
-After the sample searches finish, the terminal stays in interactive mode so you can type your own search queries. Type `exit` to quit.
+The demo indexes `packages/core/src`, retrieves relevant code from Milvus, and asks the local Ollama chat model to answer using only those snippets. It uses RESTful Milvus mode and regular dense-vector search for a stable local Windows demo path.
+After the index is ready, the terminal enters interactive mode. Type questions at `Ask>` and type `exit` to quit. Set `DEMO_REINDEX=true` when you want to rebuild the Milvus index.
 
 ### Prerequisites
 
