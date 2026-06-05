@@ -32,6 +32,38 @@ Model Context Protocol (MCP) allows you to integrate Claude Context with your fa
 
 ## Quick Start
 
+### Local-First Setup (No OpenAI or Gemini API)
+
+This fork is configured for a local-first demo path:
+
+- Embeddings: Ollama with `nomic-embed-text`
+- Vector database: local Milvus at `localhost:19530`
+- Cloud providers: optional backups, not required for the local path
+
+Install/pull the local embedding model:
+
+```bash
+ollama pull nomic-embed-text
+```
+
+Generate the global Claude Context environment file:
+
+```bash
+pnpm setup:local
+```
+
+This writes `~/.context/.env` with:
+
+```env
+EMBEDDING_PROVIDER=Ollama
+OLLAMA_MODEL=nomic-embed-text
+OLLAMA_HOST=http://127.0.0.1:11434
+MILVUS_ADDRESS=localhost:19530
+```
+
+You still need a vector database. Use local Milvus for a no-cloud setup, or set
+`MILVUS_TOKEN`/`MILVUS_ADDRESS` for Zilliz Cloud.
+
 ### Prerequisites
 
 <details>
@@ -45,9 +77,10 @@ Copy your Personal Key to replace `your-zilliz-cloud-api-key` in the configurati
 </details>
 
 <details>
-<summary>Get OpenAI API Key for embedding model</summary>
+<summary>Optional: Get OpenAI API Key for embedding model</summary>
 
-You need an OpenAI API key for the embedding model. You can get one by signing up at [OpenAI](https://platform.openai.com/api-keys).  
+OpenAI is optional. The local-first setup above uses Ollama embeddings and does not need an OpenAI key.
+If you prefer OpenAI embeddings, you can get one by signing up at [OpenAI](https://platform.openai.com/api-keys).
 
 Your API key will look like this: it always starts with `sk-`.  
 Copy your key and use it in the configuration examples below as `your-openai-api-key`.
@@ -63,6 +96,19 @@ Copy your key and use it in the configuration examples below as `your-openai-api
 #### Configuration
 
 Use the command line interface to add the Claude Context MCP server:
+
+**Local Ollama embeddings:**
+
+```bash
+claude mcp add claude-context \
+  -e EMBEDDING_PROVIDER=Ollama \
+  -e OLLAMA_MODEL=nomic-embed-text \
+  -e OLLAMA_HOST=http://127.0.0.1:11434 \
+  -e MILVUS_ADDRESS=localhost:19530 \
+  -- npx @zilliz/claude-context-mcp@latest
+```
+
+**Cloud OpenAI embeddings:**
 
 ```bash
 claude mcp add claude-context \

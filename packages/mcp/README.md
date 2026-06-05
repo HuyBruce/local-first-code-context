@@ -16,11 +16,30 @@ Model Context Protocol (MCP) allows you to integrate Claude Context with your fa
 
 ## Quick Start
 
+### Local-First Configuration
+
+Use Ollama embeddings when you want to avoid cloud embedding APIs:
+
+```bash
+EMBEDDING_PROVIDER=Ollama
+OLLAMA_MODEL=nomic-embed-text
+OLLAMA_HOST=http://127.0.0.1:11434
+MILVUS_ADDRESS=localhost:19530
+```
+
+Pull the local embedding model first:
+
+```bash
+ollama pull nomic-embed-text
+```
+
+Use local Milvus for a no-cloud setup, or set `MILVUS_TOKEN` and `MILVUS_ADDRESS` for Zilliz Cloud.
+
 ### Prerequisites
 
 Before using the MCP server, make sure you have:
 
-- API key for your chosen embedding provider (OpenAI, VoyageAI, Gemini, or Ollama setup)
+- Ollama setup for local embeddings, or an API key for a cloud embedding provider
 - Milvus vector database (local or cloud)
 
 > 💡 **Setup Help:** See the [main project setup guide](../../README.md#-quick-start) for detailed installation instructions.
@@ -35,7 +54,7 @@ Claude Context MCP supports multiple embedding providers. Choose the one that be
 
 ```bash
 # Supported providers: OpenAI, VoyageAI, Gemini, Ollama
-EMBEDDING_PROVIDER=OpenAI
+EMBEDDING_PROVIDER=Ollama
 ```
 
 <details>

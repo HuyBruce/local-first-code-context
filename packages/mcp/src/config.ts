@@ -150,8 +150,8 @@ export function createMcpConfig(): ContextMcpConfig {
         name: envManager.get('MCP_SERVER_NAME') || "Context MCP Server",
         version: envManager.get('MCP_SERVER_VERSION') || "1.0.0",
         // Embedding provider configuration
-        embeddingProvider: (envManager.get('EMBEDDING_PROVIDER') as 'OpenAI' | 'VoyageAI' | 'Gemini' | 'Ollama' | 'OpenRouter') || 'OpenAI',
-        embeddingModel: getEmbeddingModelForProvider(envManager.get('EMBEDDING_PROVIDER') || 'OpenAI'),
+        embeddingProvider: (envManager.get('EMBEDDING_PROVIDER') as 'OpenAI' | 'VoyageAI' | 'Gemini' | 'Ollama' | 'OpenRouter') || 'Ollama',
+        embeddingModel: getEmbeddingModelForProvider(envManager.get('EMBEDDING_PROVIDER') || 'Ollama'),
         // Provider-specific API keys
         openaiApiKey: envManager.get('OPENAI_API_KEY'),
         openaiBaseUrl: envManager.get('OPENAI_BASE_URL'),
@@ -231,7 +231,7 @@ Environment Variables:
   MCP_SERVER_VERSION      Server version
   
   Embedding Provider Configuration:
-  EMBEDDING_PROVIDER      Embedding provider: OpenAI, VoyageAI, Gemini, Ollama, OpenRouter (default: OpenAI)
+  EMBEDDING_PROVIDER      Embedding provider: OpenAI, VoyageAI, Gemini, Ollama, OpenRouter (default: Ollama)
   EMBEDDING_MODEL         Embedding model name (works for all providers)
   EMBEDDING_DIMENSION     Optional embedding dimension override for Ollama
   
@@ -277,8 +277,8 @@ Environment Variables:
                           watching entirely (read-only / sandboxed environments).
 
 Examples:
-  # Start MCP server with OpenAI (default) and explicit Milvus address
-  OPENAI_API_KEY=sk-xxx MILVUS_ADDRESS=localhost:19530 npx @zilliz/claude-context-mcp@latest
+  # Start MCP server with Ollama and local Milvus
+  EMBEDDING_PROVIDER=Ollama OLLAMA_MODEL=nomic-embed-text MILVUS_ADDRESS=localhost:19530 npx @zilliz/claude-context-mcp@latest
   
   # Start MCP server with OpenAI and specific model
   OPENAI_API_KEY=sk-xxx EMBEDDING_MODEL=text-embedding-3-large MILVUS_TOKEN=your-token npx @zilliz/claude-context-mcp@latest
@@ -290,15 +290,15 @@ Examples:
   EMBEDDING_PROVIDER=Gemini GEMINI_API_KEY=xxx EMBEDDING_MODEL=gemini-embedding-001 MILVUS_TOKEN=your-token npx @zilliz/claude-context-mcp@latest
   
   # Start MCP server with Ollama and specific model (using OLLAMA_MODEL)
-  EMBEDDING_PROVIDER=Ollama OLLAMA_MODEL=mxbai-embed-large MILVUS_TOKEN=your-token npx @zilliz/claude-context-mcp@latest
+  EMBEDDING_PROVIDER=Ollama OLLAMA_MODEL=mxbai-embed-large MILVUS_ADDRESS=localhost:19530 npx @zilliz/claude-context-mcp@latest
   
   # Start MCP server with Ollama and specific model (using EMBEDDING_MODEL)
-  EMBEDDING_PROVIDER=Ollama EMBEDDING_MODEL=nomic-embed-text MILVUS_TOKEN=your-token npx @zilliz/claude-context-mcp@latest
+  EMBEDDING_PROVIDER=Ollama EMBEDDING_MODEL=nomic-embed-text MILVUS_ADDRESS=localhost:19530 npx @zilliz/claude-context-mcp@latest
 
   # Start MCP server with a human-readable collection name override
-  OPENAI_API_KEY=sk-xxx MILVUS_TOKEN=your-token CODE_CHUNKS_COLLECTION_NAME_OVERRIDE=my_project npx @zilliz/claude-context-mcp@latest
+  EMBEDDING_PROVIDER=Ollama OLLAMA_MODEL=nomic-embed-text MILVUS_ADDRESS=localhost:19530 CODE_CHUNKS_COLLECTION_NAME_OVERRIDE=my_project npx @zilliz/claude-context-mcp@latest
 
   # Start MCP server with background sync enabled every minute
-  OPENAI_API_KEY=sk-xxx MILVUS_TOKEN=your-token CLAUDE_CONTEXT_BACKGROUND_SYNC=true CLAUDE_CONTEXT_SYNC_INTERVAL_MS=60000 npx @zilliz/claude-context-mcp@latest
+  EMBEDDING_PROVIDER=Ollama OLLAMA_MODEL=nomic-embed-text MILVUS_ADDRESS=localhost:19530 CLAUDE_CONTEXT_BACKGROUND_SYNC=true CLAUDE_CONTEXT_SYNC_INTERVAL_MS=60000 npx @zilliz/claude-context-mcp@latest
         `);
 }

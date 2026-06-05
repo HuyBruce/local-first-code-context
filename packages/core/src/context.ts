@@ -6,7 +6,7 @@ import {
 import {
     Embedding,
     EmbeddingVector,
-    OpenAIEmbedding
+    OllamaEmbedding
 } from './embedding';
 import {
     VectorDatabase,
@@ -125,10 +125,9 @@ export class Context {
 
     constructor(config: ContextConfig = {}) {
         // Initialize services
-        this.embedding = config.embedding || new OpenAIEmbedding({
-            apiKey: envManager.get('OPENAI_API_KEY') || 'your-openai-api-key',
-            model: 'text-embedding-3-small',
-            ...(envManager.get('OPENAI_BASE_URL') && { baseURL: envManager.get('OPENAI_BASE_URL') })
+        this.embedding = config.embedding || new OllamaEmbedding({
+            model: envManager.get('OLLAMA_MODEL') || envManager.get('EMBEDDING_MODEL') || 'nomic-embed-text',
+            host: envManager.get('OLLAMA_HOST') || 'http://127.0.0.1:11434'
         });
 
         if (!config.vectorDatabase) {

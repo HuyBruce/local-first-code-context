@@ -1,5 +1,40 @@
 # Quick Start Guide
 
+## Local-First Setup for Claude Code
+
+Use this path when you want local embeddings with Ollama instead of OpenAI/Gemini.
+
+### Step 1: Prepare Local Services
+
+1. Install Ollama and pull the embedding model:
+
+   ```bash
+   ollama pull nomic-embed-text
+   ```
+
+2. Start local Milvus, or configure a Zilliz Cloud endpoint.
+
+3. Generate the Claude Context environment file:
+
+   ```bash
+   pnpm setup:local
+   ```
+
+This writes `~/.context/.env` with Ollama defaults and `MILVUS_ADDRESS=localhost:19530`.
+
+### Step 2: Configure Claude Code
+
+```bash
+claude mcp add claude-context \
+  -e EMBEDDING_PROVIDER=Ollama \
+  -e OLLAMA_MODEL=nomic-embed-text \
+  -e OLLAMA_HOST=http://127.0.0.1:11434 \
+  -e MILVUS_ADDRESS=localhost:19530 \
+  -- npx @zilliz/claude-context-mcp@latest
+```
+
+For a managed vector database, replace `MILVUS_ADDRESS` and add `MILVUS_TOKEN`.
+
 Get Claude Context running with AI assistants in under 5 minutes! This guide covers the most common setup using MCP (Model Context Protocol) with Claude Code.
 
 ## 🚀 1-Minute Setup for Claude Code

@@ -20,7 +20,7 @@ Claude Context supports a global configuration file at `~/.context/.env` to simp
 ### Embedding Provider
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `EMBEDDING_PROVIDER` | Provider: `OpenAI`, `VoyageAI`, `Gemini`, `Ollama` | `OpenAI` |
+| `EMBEDDING_PROVIDER` | Provider: `OpenAI`, `VoyageAI`, `Gemini`, `Ollama` | `Ollama` |
 | `EMBEDDING_MODEL` | Embedding model name (works for all providers) | Provider-specific default |
 | `OPENAI_API_KEY` | OpenAI API key | Required for OpenAI |
 | `OPENAI_BASE_URL` | OpenAI API base URL (optional, for custom endpoints) | `https://api.openai.com/v1` |
@@ -74,9 +74,9 @@ When `CODE_CHUNKS_COLLECTION_NAME_OVERRIDE` is set, Claude Context writes to an 
 ```bash
 mkdir -p ~/.context
 cat > ~/.context/.env << 'EOF'
-EMBEDDING_PROVIDER=OpenAI
-OPENAI_API_KEY=sk-your-openai-api-key
-EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_PROVIDER=Ollama
+OLLAMA_MODEL=nomic-embed-text
+OLLAMA_HOST=http://127.0.0.1:11434
 MILVUS_ADDRESS=your-zilliz-cloud-public-endpoint
 MILVUS_TOKEN=your-zilliz-cloud-api-key
 EOF

@@ -85,10 +85,12 @@
                         "Ollama",
                         "Gemini"
                     ],
+                    "default": "Ollama",
                     "description": "Embedding service provider"
                 },
                 "semanticCodeSearch.embeddingProvider.model": {
                     "type": "string",
+                    "default": "nomic-embed-text",
                     "description": "Embedding model to use"
                 },
                 "semanticCodeSearch.embeddingProvider.apiKey": {
@@ -101,6 +103,7 @@
                 },
                 "semanticCodeSearch.embeddingProvider.host": {
                     "type": "string",
+                    "default": "http://127.0.0.1:11434",
                     "description": "Ollama server host URL (optional)"
                 },
                 "semanticCodeSearch.embeddingProvider.keepAlive": {
@@ -113,6 +116,7 @@
                 },
                 "semanticCodeSearch.milvus.address": {
                     "type": "string",
+                    "default": "localhost:19530",
                     "description": "Milvus server address (e.g., http://localhost:19530)"
                 },
                 "semanticCodeSearch.milvus.token": {
@@ -162,9 +166,9 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "pnpm run webpack",
-        "compile": "pnpm clean && tsc --build --force && node copy-assets.js",
-        "webpack": "pnpm clean && webpack --mode production && node copy-assets.js",
+        "vscode:prepublish": "corepack pnpm run webpack",
+        "compile": "rimraf dist && tsc --build --force && node copy-assets.js",
+        "webpack": "rimraf dist && webpack --mode production && node copy-assets.js",
         "webpack:dev": "webpack --mode development && node copy-assets.js",
         "watch": "tsc -watch -p ./",
         "clean": "rimraf dist",

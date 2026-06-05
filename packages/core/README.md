@@ -15,16 +15,24 @@ npm install @zilliz/claude-context-core
 ```
 
 ### Prepare Environment Variables
-#### OpenAI API key
-See [OpenAI Documentation](https://platform.openai.com/docs/api-reference) for more details to get your API key.
+#### Local Ollama embeddings
+Install Ollama locally and pull an embedding model:
 ```bash
-OPENAI_API_KEY=your-openai-api-key
+ollama pull nomic-embed-text
+
+EMBEDDING_PROVIDER=Ollama
+OLLAMA_MODEL=nomic-embed-text
+OLLAMA_HOST=http://127.0.0.1:11434
 ```
 
-#### Zilliz Cloud configuration
-Get a free Milvus vector database on Zilliz Cloud. 
+#### Milvus vector database
+Claude Context needs a vector database. For a fully local setup, run Milvus locally and use:
 
-Claude Context needs a vector database. You can [sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=2507-codecontext-readme) on Zilliz Cloud to get a free Serverless cluster.
+```bash
+MILVUS_ADDRESS=localhost:19530
+```
+
+You can also use fully managed Milvus on Zilliz Cloud. You can [sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=2507-codecontext-readme) to get a free Serverless cluster.
 
 ![](../../assets/signup_and_create_cluster.jpeg)
 
@@ -49,14 +57,14 @@ MILVUS_TOKEN=your-zilliz-cloud-api-key
 ```typescript
 import { 
   Context, 
-  OpenAIEmbedding, 
+  OllamaEmbedding,
   MilvusVectorDatabase 
 } from '@zilliz/claude-context-core';
 
 // Initialize embedding provider
-const embedding = new OpenAIEmbedding({
-  apiKey: process.env.OPENAI_API_KEY || 'your-openai-api-key',
-  model: 'text-embedding-3-small'
+const embedding = new OllamaEmbedding({
+  model: process.env.OLLAMA_MODEL || 'nomic-embed-text',
+  host: process.env.OLLAMA_HOST || 'http://127.0.0.1:11434'
 });
 
 // Initialize vector database

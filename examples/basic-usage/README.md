@@ -4,9 +4,12 @@ This example demonstrates the basic usage of Claude Context.
 
 ## Prerequisites
 
-1. **OpenAI API Key**: Set your OpenAI API key for embeddings:
+1. **Ollama Embedding Model**: Pull a local embedding model:
    ```bash
-   export OPENAI_API_KEY="your-openai-api-key"
+   ollama pull nomic-embed-text
+   export EMBEDDING_PROVIDER=Ollama
+   export OLLAMA_MODEL=nomic-embed-text
+   export OLLAMA_HOST=http://127.0.0.1:11434
    ```
 
 2. **Milvus Server**: Make sure Milvus server is running:
@@ -32,7 +35,7 @@ This example demonstrates the basic usage of Claude Context.
    pnpm install
    ```
 
-2. Set environment variables (see examples above)
+2. Set environment variables (see examples above). OpenAI, Gemini, and VoyageAI are optional cloud embedding providers; the default local setup uses Ollama.
 
 3. Run the example:
    ```bash
