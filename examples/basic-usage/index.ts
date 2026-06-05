@@ -7,6 +7,7 @@ import {
 } from '@zilliz/claude-context-core';
 import { envManager } from '@zilliz/claude-context-core';
 import * as path from 'path';
+import * as readline from 'readline/promises';
 
 try {
     require('dotenv').config();
@@ -75,24 +76,26 @@ async function main() {
         ];
 
         for (const query of queries) {
-            console.log(`\nSearch: "${query}"`);
-            const results = await context.semanticSearch(codebasePath, query, 3, 0.3);
-
-            if (results.length === 0) {
-                console.log('   No relevant results found');
-                continue;
-            }
-
-            results.forEach((result, index) => {
-                console.log(`   ${index + 1}. Similarity: ${(result.score * 100).toFixed(2)}%`);
-                console.log(`      File: ${path.join(codebasePath, result.relativePath)}`);
-                console.log(`      Language: ${result.language}`);
-                console.log(`      Lines: ${result.startLine}-${result.endLine}`);
-                console.log(`      Preview: ${result.content.substring(0, 100)}...`);
-            });
+            await runSearch(context, codebasePath, query);
         }
 
-        console.log('\nExample completed successfully!');
+        console.log('\nInteractive search mode. Type a question, or type "exit" to quit.');
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        while (true) {
+            const query = (await rl.question('\nSearch> ')).trim();
+            if (!query || query.toLowerCase() === 'exit' || query.toLowerCase() === 'quit') {
+                break;
+            }
+
+            await runSearch(context, codebasePath, query);
+        }
+
+        rl.close();
+        console.log('\nDemo finished.');
     } catch (error) {
         console.error('Error occurred:', error);
 
@@ -115,6 +118,24 @@ async function main() {
 
         process.exit(1);
     }
+}
+
+async function runSearch(context: Context, codebasePath: string, query: string): Promise<void> {
+    console.log(`\nSearch: "${query}"`);
+    const results = await context.semanticSearch(codebasePath, query, 3, 0.3);
+
+    if (results.length === 0) {
+        console.log('   No relevant results found');
+        return;
+    }
+
+    results.forEach((result, index) => {
+        console.log(`   ${index + 1}. Similarity: ${(result.score * 100).toFixed(2)}%`);
+        console.log(`      File: ${path.join(codebasePath, result.relativePath)}`);
+        console.log(`      Language: ${result.language}`);
+        console.log(`      Lines: ${result.startLine}-${result.endLine}`);
+        console.log(`      Preview: ${result.content.substring(0, 100)}...`);
+    });
 }
 
 if (require.main === module) {

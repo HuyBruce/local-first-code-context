@@ -85,6 +85,7 @@ node node_modules\.pnpm\tsx@4.19.4\node_modules\tsx\dist\cli.mjs examples\basic-
 ```
 
 The demo indexes `packages/core/src` and performs semantic searches over the generated Milvus index. It uses RESTful Milvus mode and regular dense-vector search for a stable local Windows demo path.
+After the sample searches finish, the terminal stays in interactive mode so you can type your own search queries. Type `exit` to quit.
 
 ### Prerequisites
 
